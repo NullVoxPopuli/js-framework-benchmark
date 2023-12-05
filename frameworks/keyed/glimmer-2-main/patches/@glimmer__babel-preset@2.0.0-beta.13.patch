@@ -1,0 +1,10 @@
+diff --git a/index.js b/index.js
+index 43d742346d95e475ba3e33613e0c01bb87dc9f1a..613f3385bbc4d0e2f9f588e77f397bf0715d8e5a 100644
+--- a/index.js
++++ b/index.js
+@@ -1,4 +1,4 @@
+-const generateVmPlugins = require('@glimmer/vm-babel-plugins');
++const { default: generateVmPlugins } = require('@glimmer/vm-babel-plugins');
+ 
+ function defaultTo(value, defaultVal) {
+   return value === undefined ? defaultVal : value;
