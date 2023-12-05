@@ -6,8 +6,20 @@
   <link rel="stylesheet" href="/css/currentStyle.css">
 
   <script type="module">
-    import run from "./src/index.ts";
-    run();
+    import {renderComponent} from '@glimmer/core';
+    import App from './src/App';
+
+    document.addEventListener(
+      'DOMContentLoaded',
+      () => {
+        const element = document.getElementById('app');
+        renderComponent(App, {
+          owner: {},
+          element: element
+        });
+      },
+      {once: true}
+    );
   </script>
 </head>
 
