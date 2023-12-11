@@ -1,7 +1,7 @@
-'use strict';
+﻿'use strict';
 
 const EmberApp = require('ember-cli/lib/broccoli/ember-app');
-const { Webpack } = require('@embroider/webpack');
+const {Webpack} = require('@embroider/webpack');
 
 module.exports = function (defaults) {
   const app = new EmberApp(defaults, {
@@ -36,12 +36,10 @@ module.exports = function (defaults) {
     staticAddonTrees: true,
     staticHelpers: true,
     staticComponents: true,
-    // staticModifiers: true,
-    // staticEmberSource: true,
     packagerOptions: {
       webpackConfig: {
-        mode: 'production',
-      },
-    },
+        mode: 'production'
+      }
+    }
   });
 };
