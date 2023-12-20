@@ -4,7 +4,7 @@ module.exports = function (environment) {
   const ENV = {
     modulePrefix: 'ember-temp',
     environment,
-    rootURL: '/frameworks/keyed/ember/dist/',
+    rootURL: '/frameworks/keyed/ember-template-only/dist/',
     locationType: 'history',
     EmberENV: {
       EXTEND_PROTOTYPES: false,
