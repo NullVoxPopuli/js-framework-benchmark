@@ -1,12 +1,21 @@
-'use strict';
+﻿'use strict';
 
 const EmberApp = require('ember-cli/lib/broccoli/ember-app');
-const { Webpack } = require('@embroider/webpack');
+const {Webpack} = require('@embroider/webpack');
 
 module.exports = function (defaults) {
   const app = new EmberApp(defaults, {
-    name: 'ember-temp',
     hinting: false,
+    'ember-cli-terser': {
+      terser: {
+        compress: {
+          sequences: false,
+        },
+        output: {
+          semicolons: false,
+        },
+      },
+    },
   });
 
   // Use `app.import` to add additional libraries to the generated
@@ -22,42 +31,15 @@ module.exports = function (defaults) {
   // please specify an object with the list of modules as keys
   // along with the exports of each module as its value.
 
-  const TerserPlugin = require('terser-webpack-plugin');
   return require('@embroider/compat').compatBuild(app, Webpack, {
     staticAddonTestSupportTrees: true,
     staticAddonTrees: true,
     staticHelpers: true,
     staticComponents: true,
-    staticModifiers: true,
-    // from ember internals, this is needed
-    // allowUnsafeDynamicComponents: true,
-    staticEmberSource: false,
     packagerOptions: {
       webpackConfig: {
-        mode: 'production',
-        optimization: {
-          minimize: true,
-          minimizer: [
-            new TerserPlugin({
-              terserOptions: {
-                ecma: 2020,
-                toplevel: true,
-                compress: {
-                  toplevel: true,
-                  ecma: 2020,
-                  hoist_funs: true,
-                  sequences: false,
-                  module: true,
-                  passes: 4,
-                },
-                output: {
-                  semicolons: false,
-                },
-              },
-            }),
-          ],
-        },
-      },
-    },
+        mode: 'production'
+      }
+    }
   });
 };
