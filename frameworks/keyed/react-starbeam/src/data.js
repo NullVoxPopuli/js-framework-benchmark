@@ -7,14 +7,71 @@
   * - each row is a reactive.object, because the labels can update
   * - the selected index, a reactive value (cell)
   */
-import { Cell } from '@starbeam/core';
+import { Cell, FormulaFn } from '@starbeam/core';
 import { reactive } from '@starbeam/js';
 
 const DATA_SIZE = 1_000;
 const LOTS_OF_DATA_SIZE = 10_000;
 
+/**
+  * React doesn't support iterators
+  *  - Map
+  *  - Object
+  *  - Set
+  *
+  *  ... React only supports arrays for iteration....
+  *
+  * so this whole object is a back-door way around adding that
+  * support to React.
+  *
+  * And as a result... this may suffer from performance issues.
+  */
+class ReactCompatibleUserOrderedMap {
+  constructor(dataMapFn) {
+    this.dataMapFn = dataMapFn;
+  }
+
+  #data = FormulaFn(() => this.dataMapFn());
+  get data() {
+    return this.#data.current;
+  }
+
+  #map = FormulaFn(() => {
+    let data = this.data;
+
+    return (callback) => {
+      let results = new Array();
+
+      for (let datum of data.values()) {
+        results.push(callback(datum));
+      }
+
+      return results;
+    };
+  });
+  get map() {
+    return this.#map.current;
+  }
+}
+
 export class TableData {
+  lastSelected = null;
+  get selected() {
+    return this.lastSelected;
+  }
+  set selected(id) {
+    if (this.lastSelected) {
+      this.data.get(this.lastSelected).isSelected = false;
+    }
+    if (id) {
+      this.data.get(id).isSelected = true;
+      this.lastSelected = id;
+    }
+  }
+
   /**
+    * Reactive version of a native Map.
+    *
     * If we used a decorator, we could intercept normal JS assignment
     * this.selected = 2; (for example, would "just work")
     * Without the decorator, we have to use Cell-specific APIs
@@ -23,25 +80,20 @@ export class TableData {
     * Thankfully, we can fake a decorator's behavior manually by
     * defining a getter and setter.
     */
-  #selected = Cell();
-  get selected() {
-    return this.#selected.current;
-  }
-  set selected(value) {
-    this.#selected.set(value);
-  }
-
-  /**
-    * Reactive version of a native Array.
-    * (could be handled via decorator)
-    */
-  #data = Cell(reactive.array())
+  #data = Cell(reactive.Map())
   get data() {
     return this.#data.current;
   }
-  set data(newArray) {
-    this.#data.set(reactive.array(newArray));
+  set data(newMap) {
+    this.#data.set(newMap);
   }
+
+  /**
+    * Because a Map can't have its order changed (but arrays can),
+    * we'll maintain order in this structure
+    */
+  dataArray = new ReactCompatibleUserOrderedMap(() => this.data);
+
   /*******************************
    * End Reactive versions of data
    * everything else in this class is as vanilla JS as you can get.
@@ -58,31 +110,36 @@ export class TableData {
   };
 
   add = () => {
-    this.data.push(...buildData(DATA_SIZE));
+    buildData(DATA_SIZE, this.data);
   };
 
   update = () => {
-    for (let i = 0; i < this.data.length; i+= 10) {
-      this.data[i].label += ' !!!';
+    // Unfortunately, we need to touch all keys, because
+    // this test/bench is optimized for Arrays
+    let ids = [...this.data.keys()];
+    for (let i = 0; i < ids.length; i+= 10) {
+      let id = ids[i];
+      let item = this.data.get(id);
+
+      item.label += ' !!!';
     }
   };
 
   clear = () => this.data = [];
   swapRows = () => {
-    if (this.data.length > 998) {
-      let second = this.data[1];
-      let nearEnd = this.data[998];
+    // This test is arbitrary, and I'm not sure if it's meant to test
+    // any arbitrary swap -- constraints are a little fuzzy.
+    // But! given any two ids, a swap can be done this way
+    let itemA = this.data.get(1);
+    let itemB = this.data.get(998);
 
-      this.data[1] = nearEnd;
-      this.data[998] = second;
-    }
+    this.data.set(1, itemB);
+    this.data.set(998, itemA);
   };
 
   select = (id) => this.selected = id;
   remove = (idToRemove) => {
-    let index = this.data.findIndex(datum => datum.id === idToRemove);
-
-    this.data.splice(index, 1);
+    this.data.delete(idToRemove);
   };
 
 }
@@ -110,18 +167,22 @@ const nouns = [
 ];
 
 let rowId = 1;
-function buildData(count = DATA_SIZE) {
-  const data = new Array(count);
+function buildData(count = DATA_SIZE, map) {
+  const data = map ?? reactive.Map();
 
   for (let i = 0; i < count; i++) {
-    data[i] = reactive.object({
-      id: rowId++,
-      label: adjectives[_random(adjectives.length)]
-        + " "
-        + colours[_random(colours.length)]
-        + " "
-        + nouns[_random(nouns.length)],
-    });
+    let id = rowId++;
+
+    data.set(id,
+      reactive.object({
+        id,
+        label: adjectives[_random(adjectives.length)]
+          + " "
+          + colours[_random(colours.length)]
+          + " "
+          + nouns[_random(nouns.length)],
+      })
+    )
   }
   return data;
 }
