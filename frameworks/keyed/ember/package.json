@@ -21,6 +21,7 @@
   },
   "type": "module",
   "imports": {
+    "#config": "./src/config.js",
     "#soon/*": "./src/coming-soon/*",
     "#utils": "./src/utils.js",
     "#routes/*": "./src/routes/*",

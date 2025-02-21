@@ -33,7 +33,7 @@ case "$1" in
   start)
     # https://github.com/krausest/js-framework-benchmark/tree/chrome110?tab=readme-ov-file#22-start-installing
     cd ../../../
-    npm ci
+    npm install
     # pnpm install
     # They are missing a dependency
     # pnpm add @esbuild/linux-x64@0.23.1

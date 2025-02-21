@@ -9,9 +9,10 @@
   </head>
   <body>
     <script type="module">
-      import Application from "./app";
+      import Application from "./app.js";
+      import config from './config.js'
 
-      Application.create({ /* App-specific config */ });
+      Application.create(config.APP);
     </script>
   </body>
 </html>

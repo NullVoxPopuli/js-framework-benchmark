@@ -8,14 +8,15 @@ export default defineConfig({
   // Not normal stuff
   ...(VITE_NO_JSBF
     ? {
-      build: {
-        rollupOptions: {
-          input: {
-            main: 'src/index.dev.html'
-          }
-        }
+      base: '/',
+        build: {
+          rollupOptions: {
+            input: {
+              main: './src/index.dev.html',
+            },
+          },
+        },
       }
-    }
     : {
         base: '/frameworks/keyed/ember/dist/',
         build: {
