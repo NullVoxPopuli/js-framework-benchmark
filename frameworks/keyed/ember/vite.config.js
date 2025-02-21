@@ -8,7 +8,7 @@ export default defineConfig({
   // Not normal stuff
   ...(VITE_NO_JSBF
     ? {
-      base: '/',
+        base: '/',
         build: {
           rollupOptions: {
             input: {

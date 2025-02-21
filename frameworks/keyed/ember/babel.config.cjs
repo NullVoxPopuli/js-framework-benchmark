@@ -1,7 +1,7 @@
 'use strict';
 
-const { buildMacros } = require('@embroider/macros/babel)';
-const macros = buildMacros({})
+const { buildMacros } = require('@embroider/macros/babel');
+const macros = buildMacros({});
 
 module.exports = {
   plugins: [
@@ -9,7 +9,7 @@ module.exports = {
       'babel-plugin-ember-template-compilation',
       {
         compilerPath: 'ember-source/dist/ember-template-compiler.js',
-        transforms: [],
+        transforms: [...macros.templateMacros],
       },
     ],
     [
